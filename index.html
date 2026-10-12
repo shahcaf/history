@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>History Detective</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: #101724;
+            color: #eff3fa;
+            font-family: system-ui, sans-serif;
+            padding: 24px 16px;
+            min-height: 100vh
+        }
+
+        main {
+            max-width: 720px;
+            margin: auto
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px
+        }
+
+        .logo {
+            color: #b6f578;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2px
+        }
+
+        h1 {
+            font-size: clamp(27px, 6vw, 42px);
+            margin: 9px 0
+        }
+
+        p {
+            line-height: 1.6
+        }
+
+        .muted {
+            color: #aab8cf
+        }
+
+        .pill {
+            border: 1px solid #43516b;
+            padding: 9px 13px;
+            border-radius: 30px;
+            white-space: nowrap;
+            font-size: 13px
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 26px 0 10px;
+            font-size: 14px
+        }
+
+        .track {
+            height: 7px;
+            background: #2a3447;
+            border-radius: 10px;
+            overflow: hidden
+        }
+
+        .fill {
+            height: 100%;
+            background: #b6f578;
+            transition: width .3s
+        }
+
+        article {
+            background: #1b2537;
+            border: 1px solid #34425a;
+            border-radius: 22px;
+            padding: clamp(20px, 5vw, 32px);
+            margin: 22px 0
+        }
+
+        .tag {
+            font-size: 12px;
+            letter-spacing: 1.6px;
+            color: #b6f578;
+            font-weight: 800
+        }
+
+        h2 {
+            font-size: 23px;
+            line-height: 1.4;
+            margin: 13px 0 22px
+        }
+
+        .evidence {
+            background: #121b2b;
+            border-left: 3px solid #b6f578;
+            padding: 14px 17px;
+            margin: 18px 0;
+            font-size: 14px;
+            color: #cbd6e7
+        }
+
+        .options {
+            display: grid;
+            gap: 11px
+        }
+
+        button {
+            font: inherit;
+            cursor: pointer;
+            touch-action: manipulation
+        }
+
+        button:focus-visible {
+            outline: 3px solid #ffe39e;
+            outline-offset: 3px
+        }
+
+        .option {
+            display: flex;
+            text-align: left;
+            align-items: center;
+            gap: 13px;
+            width: 100%;
+            border: 1px solid #465571;
+            border-radius: 12px;
+            background: #222f45;
+            color: #eff3fa;
+            padding: 15px;
+            line-height: 1.4
+        }
+
+        .option:hover:not(:disabled) {
+            background: #30425c;
+            border-color: #b6f578
+        }
+
+        .letter {
+            border: 1px solid #65738a;
+            border-radius: 7px;
+            min-width: 28px;
+            text-align: center;
+            padding: 3px;
+            font-size: 12px
+        }
+
+        .option:disabled {
+            cursor: default
+        }
+
+        .option.correct {
+            background: #183e36;
+            border-color: #79ddb4
+        }
+
+        .option.wrong {
+            background: #482c39;
+            border-color: #fb9eaa
+        }
+
+        .feedback {
+            margin-top: 18px;
+            border-radius: 12px;
+            background: #121b2b;
+            padding: 17px;
+            line-height: 1.6
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+            flex-wrap: wrap
+        }
+
+        .primary,
+        .secondary {
+            padding: 13px 20px;
+            border-radius: 11px;
+            font-weight: 700
+        }
+
+        .primary {
+            background: #b6f578;
+            border: 0;
+            color: #182414
+        }
+
+        .secondary {
+            background: transparent;
+            border: 1px solid #53637d;
+            color: #dce5f3
+        }
+
+        .primary:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .score {
+            font-size: 64px;
+            font-weight: 800;
+            color: #b6f578;
+            margin: 16px 0
+        }
+
+        .review {
+            border-top: 1px solid #40506a;
+            padding: 18px 0
+        }
+
+        .review p {
+            margin: 7px 0;
+            font-size: 14px
+        }
+
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: #aab8cf;
+            margin: 20px
+        }
+
+        .hint {
+            color: #ffe39e;
+            font-size: 14px;
+            margin-top: 15px
+        }
+
+        [hidden] {
+            display: none !important
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header>
+            <div>
+                <div class="logo">HISTORY DETECTIVE</div>
+                <h1>The Imperialist Race</h1>
+            </div><span class="pill">Pages 10–11</span>
+        </header>
+        <p class="muted">Read the clues. Decode the cartoon. Build your exam skills.</p>
+        <div id="game"></div>
+        <footer>Untimed practice • 100 points per correct answer • Hints are free</footer>
+    </main>
+    <script>
+        const bank = [
+            { topic: "The basics", q: "What makes a policy imperialist?", a: ["A powerful country controls other territories and their people.", "A country gives its territories independent governments.", "Two countries exchange goods without controlling each other.", "A country limits its government to its existing territory."], h: "Look for control extending beyond a country's own territory.", e: "Imperialism involves extending a country's control over other territories and populations to increase its power and wealth." },
+            { topic: "The race", q: "Why was imperialist expansion described as a “race”?", a: ["Countries competed to gain territories before their rivals.", "Countries agreed to leave all overseas territories independent.", "Countries competed to withdraw from overseas territories first.", "Countries agreed to share all colonial resources equally."], h: "Think about what happens when several powers want more territory.", e: "The race was competition for territories, especially in Africa and Asia. Each power wanted to expand its empire." },
+            { topic: "Reading the caption", scene: true, q: "According to the caption on page 10, which powers are competing?", a: ["Britain and France", "Germany and Italy", "Spain and Portugal", "Russia and Japan"], h: "The caption identifies two western European colonial powers.", e: "The caption identifies a struggle between Britain and France over areas in Africa in 1904." },
+            { topic: "Decoding symbols", scene: true, q: "What does the map symbolize in this cartoon?", a: ["African territories the powers want to control", "European borders the powers want to defend", "Trade routes the powers want to close", "Independent states the powers want to protect"], h: "The map's location matters: it is a map of Africa.", e: "The map stands for African territories. Pulling it represents competition over who will control those territories." },
+            { topic: "Cartoon techniques", scene: true, q: "What is the effect of the exaggerated bodies and forceful movements?", a: ["They emphasize the intensity of the rivalry.", "They provide accurate measurements of the leaders.", "They show the countries' equal military strength.", "They prove that the figures are ordinary athletes."], h: "Cartoonists distort appearances to emphasize an idea rather than record reality.", e: "The exaggerated poses make the competition look like a tug-of-war and emphasize the struggle for control." },
+            { topic: "Observation or interpretation?", scene: true, q: "Which statement is a direct observation, rather than an interpretation?", a: ["Two figures pull a map in opposite directions.", "The figures symbolize competing imperial powers.", "The scene criticizes European attitudes toward Africa.", "The pulling represents a struggle for colonial control."], h: "Choose something you can describe without explaining its meaning.", e: "Pulling a map is visible in the scene. Symbolism, criticism and historical meaning are interpretations based on that observation." },
+            { topic: "Finding the message", scene: true, q: "Which interpretation is best supported by the cartoon?", a: ["European powers treat Africa as property to compete over.", "African populations choose their own colonial rulers.", "European powers give up their territorial ambitions.", "African territories control the policies of European states."], h: "Consider who is pulling the map and whose wishes are not represented.", e: "The European figures struggle over the map as though Africa were their property. This supports a criticism of dividing it without considering its inhabitants." },
+            { topic: "Life under imperialism", q: "According to the textbook, how did imperial powers benefit economically?", a: ["They exploited local raw materials and cheap labor.", "They transferred ownership of their factories to local workers.", "They prevented businesses from using colonial resources.", "They distributed colonial profits equally to all inhabitants."], h: "Think about who controlled the resources and who performed the work.", e: "The text describes control of raw materials and exploitation of local inhabitants as cheap labor." },
+            { topic: "Supporting an argument", scene: true, q: "Which answer best connects visual evidence to historical meaning?", a: ["The opposite pulling symbolizes competition for African territory.", "The picture contains two figures and a map of Africa.", "The cartoon is old, so it must oppose every kind of government.", "The figures look unusual, so the picture has no historical meaning."], h: "A strong answer explains both a visible detail and what that detail means.", e: "The best analysis links a detail—pulling in opposite directions—to its meaning: rivalry over African territories." },
+            { topic: "Final challenge", scene: true, q: "Which proposed title best captures the cartoon's message?", a: ["Africa Pulled Apart: A Struggle for Control", "Africa United: Local Leaders Choose Their Future", "Europe Withdraws: The End of Colonial Rule", "Equal Partners: A Peaceful Trade Agreement"], h: "A suitable title should match the action and the competition it symbolizes.", e: "“Africa Pulled Apart” captures both the visual pulling of the map and the competition for control." }
+        ];
+        const game = document.getElementById("game");
+        let questions = [], index = 0, score = 0, streak = 0, answers = [], locked = false;
+        function shuffle(arr) { return [...arr].sort(() => Math.random() - .5) }
+        function start(items = bank) {
+            questions = items.map(x => ({ ...x, options: shuffle(x.a.map((text, i) => ({ text, right: i === 0 }))) }));
+            index = 0; score = 0; streak = 0; answers = []; render();
+        }
+        function render() {
+            locked = false;
+            const q = questions[index];
+            game.innerHTML = `<div class="stats"><span>Case ${index + 1} / ${questions.length}</span><span>${score} points · ${streak} streak</span></div><div class="track" role="progressbar" aria-label="Questions completed" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="${index}"><div class="fill" style="width:${index / questions.length * 100}%"></div></div><article><div class="tag">${q.topic.toUpperCase()}</div>${q.scene ? '<div class="evidence"><strong>Cartoon clue</strong><br>Two figures pull a map of Africa in opposite directions. Their bodies and movements are exaggerated.<br><small>Description of your page 10 cartoon.</small></div>' : ''}<h2 id="question" tabindex="-1">${q.q}</h2><div class="options" role="group" aria-labelledby="question"></div><p class="hint" hidden></p><div class="feedback" role="status" hidden></div><div class="actions"><button class="secondary" id="hint">Show hint</button><button class="primary" id="next" disabled>${index === questions.length - 1 ? "See results" : "Next question →"}</button></div></article>`;
+            const options = game.querySelector(".options");
+            q.options.forEach((option, i) => {
+                const b = document.createElement("button"); b.className = "option";
+                const label = document.createElement("span"); label.className = "letter"; label.textContent = "ABCD"[i];
+                const content = document.createElement("span"); content.textContent = option.text;
+                b.append(label, content); b.onclick = () => choose(i); options.appendChild(b);
+            });
+            document.getElementById("hint").onclick = () => {
+                const el = game.querySelector(".hint"); el.hidden = !el.hidden; el.textContent = q.h;
+                document.getElementById("hint").textContent = el.hidden ? "Show hint" : "Hide hint";
+            };
+            document.getElementById("next").onclick = () => { index++; index < questions.length ? render() : finish() };
+        }
+        function choose(n) {
+            if (locked) return; locked = true;
+            const q = questions[index], right = q.options[n].right;
+            if (right) { score += 100; streak++ } else streak = 0;
+            answers.push({ q, selected: q.options[n].text, right });
+            game.querySelectorAll(".option").forEach((b, i) => {
+                b.disabled = true;
+                if (q.options[i].right) { b.classList.add("correct"); b.append(document.createTextNode(" ✓")) }
+                else if (i === n) { b.classList.add("wrong"); b.append(document.createTextNode(" ✕")) }
+            });
+            game.querySelector(".stats").lastElementChild.textContent = `${score} points · ${streak} streak`;
+            const f = game.querySelector(".feedback"); f.hidden = false;
+            f.innerHTML = `<strong>${right ? "Clue solved! +100 points" : "Let's unpack this clue."}</strong><br>${q.e}`;
+            document.getElementById("next").disabled = false;
+        }
+        function finish() {
+            const correct = answers.filter(a => a.right).length, missed = answers.filter(a => !a.right);
+            const percentage = Math.round(correct / questions.length * 100);
+            const title = percentage === 100 ? "Master detective" : percentage >= 70 ? "Sharp investigator" : "Detective in training";
+            game.innerHTML = `<article><div class="tag">CASE CLOSED</div><h2>${title}</h2><div class="score">${score}<span style="font-size:18px;color:#aab8cf"> / ${questions.length * 100}</span></div><p>${correct} of ${questions.length} correct (${percentage}%). ${missed.length ? "Review the explanations, then retry the questions you missed." : "You connected the evidence to its historical meaning."}</p><div class="evidence"><strong>Your exam formula</strong><br>Describe → Identify symbols → Explain exaggeration → Explain the message → Connect to history</div><div class="actions"><button class="primary" id="again">Play again</button>${missed.length ? '<button class="secondary" id="retry">Retry missed questions</button>' : ''}<button class="secondary" id="review">Review answers</button></div><section id="reviewList" hidden></section></article>`;
+            document.getElementById("again").onclick = () => start();
+            if (missed.length) document.getElementById("retry").onclick = () => start(missed.map(x => x.q));
+            const review = document.getElementById("reviewList");
+            answers.forEach((a, i) => {
+                const d = document.createElement("div"); d.className = "review";
+                const h = document.createElement("strong"); h.textContent = `${i + 1}. ${a.q.q}`;
+                const selected = document.createElement("p"); selected.textContent = `Your answer: ${a.selected} ${a.right ? "✓" : "✕"}`;
+                const correctLine = document.createElement("p"); correctLine.textContent = "Correct answer: " + a.q.a[0];
+                const explanation = document.createElement("p"); explanation.className = "muted"; explanation.textContent = a.q.e;
+                d.append(h, selected); if (!a.right) d.append(correctLine); d.append(explanation); review.append(d);
+            });
+            document.getElementById("review").onclick = () => { review.hidden = !review.hidden; document.getElementById("review").textContent = review.hidden ? "Review answers" : "Hide review" };
+        }
+        start();
+    </script>
+</body>
+
+</html>
